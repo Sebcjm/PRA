@@ -30,23 +30,28 @@ command -v tar >/dev/null || die "tar n'est pas installé."
 
 mkdir -p "$ARCHIVE_DIR" "$KEY_DIR" "$LOG_DIR"
 
-# ---------- Menu interactif ----------
-clear
-echo "============================================================"
-echo "   Sauvegarde chiffrée de : $SOURCE_DIR"
-echo "============================================================"
-echo "1) Sauvegarde complète (archive + chiffrement symétrique AES-256)"
-echo "2) Sauvegarde chiffrée + suppression de la clé après usage"
-echo "3) Quitter"
-echo "============================================================"
-read -rp "Votre choix [1-3] : " CHOICE
+# ---------- Mode automatique ou interactif ----------
+if [[ "${1:-}" == "--auto" ]]; then
+    # Mode cron : sauvegarde complète et conservation de la clé
+    DELETE_KEY_AFTER=0
+else
+    clear
+    echo "============================================================"
+    echo "   Sauvegarde chiffrée de : $SOURCE_DIR"
+    echo "============================================================"
+    echo "1) Sauvegarde complète (archive + chiffrement symétrique AES-256)"
+    echo "2) Sauvegarde chiffrée + suppression de la clé après usage"
+    echo "3) Quitter"
+    echo "============================================================"
+    read -rp "Votre choix [1-3] : " CHOICE
 
-case "$CHOICE" in
-    1) DELETE_KEY_AFTER=0 ;;
-    2) DELETE_KEY_AFTER=1 ;;
-    3) echo "Annulé."; exit 0 ;;
-    *) die "Choix invalide." ;;
-esac
+    case "$CHOICE" in
+        1) DELETE_KEY_AFTER=0 ;;
+        2) DELETE_KEY_AFTER=1 ;;
+        3) echo "Annulé."; exit 0 ;;
+        *) die "Choix invalide." ;;
+    esac
+fi
 
 # ---------- Horodatage commun (clé + archive) ----------
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
@@ -104,11 +109,3 @@ echo
 echo "Archive : $ARCHIVE_ENC"
 echo "Clé     : $KEY_FILE"
 echo "Log     : $LOG_FILE"
-
-Installation
-bash
-
-sudo mkdir -p /usr/local/sbin
-sudo cp backup_www.sh /usr/local/sbin/backup_www.sh
-sudo chmod 700 /usr/local/sbin/backup_www.sh
-sudo /usr/local/sbin/backup_www.sh
