@@ -117,35 +117,3 @@ echo
 echo "=== Restauration terminée avec succès ==="
 echo "Contenu restauré : ${DEST}/html"
 
-Installation
-bash
-
-sudo cp restore_www.sh /usr/local/sbin/restore_www.sh
-sudo chmod 700 /usr/local/sbin/restore_www.sh
-sudo /usr/local/sbin/restore_www.sh
-
-Détails importants
-Élément	Choix	Pourquoi
-Algorithme	AES-256-CBC + PBKDF2 (100 000 itérations)	Standard, robuste, dérivé du mot de passe sécurisé
-Clé	32 octets aléatoires (openssl rand -base64 32)	256 bits d'entropie cryptographique
-Nommage	Même BASENAME (horodaté) pour archive et clé	Association automatique à la restauration
-Emplacement clé	/backup/keys/ en chmod 600	Accessible uniquement au root
-Archive en clair	Supprimée immédiatement après chiffrement	Évite toute fuite sur disque
-Option suppression clé	Menu 2	Utile si vous stockez la clé hors du serveur (coffre, gestionnaire)
-Arborescence créée
-text
-
-/backup/
-├── archives/
-│   └── backup_www_html_20250115_143022.tar.gz.enc
-├── keys/
-│   └── backup_www_html_20250115_143022.key
-└── logs/
-    └── backup_www_html_20250115_143022.log
-
-Exemple de cron (sauvegarde quotidienne à 2h)
-bash
-
-sudo crontab -e
-# Ajouter :
-0 2 * * * /usr/local/sbin/backup_www.sh --auto >/dev/null 2>&1

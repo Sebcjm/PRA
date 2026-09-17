@@ -53,20 +53,19 @@ else
     esac
 fi
 
-# ---------- Horodatage commun (clé + archive) ----------
+# ---------- Génération clé + horodatage ----------
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
-BASENAME="backup_www_html_${TIMESTAMP}"
+BASENAME="${TIMESTAMP}"
+
 ARCHIVE_PLAIN="${ARCHIVE_DIR}/${BASENAME}.tar.gz"
 ARCHIVE_ENC="${ARCHIVE_DIR}/${BASENAME}.tar.gz.enc"
 KEY_FILE="${KEY_DIR}/${BASENAME}.key"
 LOG_FILE="${LOG_DIR}/${BASENAME}.log"
 
-log "=== Début de la sauvegarde : $BASENAME ==="
-
-# ---------- Génération de la clé symétrique (256 bits) ----------
-log "Génération de la clé AES-256..."
 openssl rand -base64 32 > "$KEY_FILE"
 chmod 600 "$KEY_FILE"
+
+log "=== Début de la sauvegarde : $BASENAME ==="
 log "Clé générée : $KEY_FILE"
 
 # ---------- Création de l'archive tar.gz ----------
@@ -77,7 +76,7 @@ log "Archive créée : $(du -h "$ARCHIVE_PLAIN" | cut -f1)"
 # ---------- Chiffrement symétrique AES-256-CBC ----------
 log "Chiffrement AES-256-CBC de l'archive..."
 openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
-    -in  "$ARCHIVE_PLAIN" \
+    -in "$ARCHIVE_PLAIN" \
     -out "$ARCHIVE_ENC" \
     -pass file:"$KEY_FILE"
 
@@ -109,3 +108,6 @@ echo
 echo "Archive : $ARCHIVE_ENC"
 echo "Clé     : $KEY_FILE"
 echo "Log     : $LOG_FILE"
+
+#-----------Génération Clé de chiffrement
+
